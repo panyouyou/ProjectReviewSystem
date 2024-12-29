@@ -1,0 +1,40 @@
+1.projects（项目表）
+CREATE TABLE projects (
+    project_id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    project_name VARCHAR(255) NOT NULL,
+    description TEXT,
+    status VARCHAR(50) DEFAULT '待评审',
+    submission_date DATETIME,
+    reviewer_count INT DEFAULT 0,
+    review_date DATETIME,
+    creator_id BIGINT,
+);
+2.reviewers（评委表）
+CREATE TABLE reviewers (
+    reviewer_id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    reviewer_name VARCHAR(50) NOT NULL,
+    reviewer_email VARCHAR(100),
+    department VARCHAR(50),
+    review_count INT DEFAULT 0,
+    status VARCHAR(50) DEFAULT '待评审'
+);
+3.review_activities（评审活动表）
+CREATE TABLE review_activities (
+    review_id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    project_id BIGINT NOT NULL,
+    reviewer_id BIGINT NOT NULL,
+    score INT CHECK (score BETWEEN 1 AND 10),
+    comments TEXT,
+    review_date DATETIME NOT NULL,
+    status VARCHAR(50) DEFAULT '待评审',
+    FOREIGN KEY (project_id) REFERENCES projects(project_id),
+    FOREIGN KEY (reviewer_id) REFERENCES reviewers(reviewer_id)
+);
+4.users（系统用户表）
+CREATE TABLE users (
+    user_id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    role VARCHAR(50),
+    email VARCHAR(100),
+);
