@@ -1,0 +1,41 @@
+CREATE DATABASE ReviewSystem;
+
+USE ReviewSystem;
+
+
+CREATE TABLE users (
+    id INT AUTO_INCREMENT PRIMARY KEY,         -- 用户ID
+    username VARCHAR(50) NOT NULL UNIQUE,     -- 用户名
+    password VARCHAR(255) NOT NULL,           -- 用户密码（加密存储）
+    email VARCHAR(100) NOT NULL UNIQUE,       -- 用户邮箱
+    role ENUM('ADMIN', 'REVIEWER', 'USER') DEFAULT 'USER', -- 用户身份
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP -- 创建时间
+);
+CREATE TABLE projects (
+    id INT AUTO_INCREMENT PRIMARY KEY,        -- 项目编号
+    project_name VARCHAR(100) NOT NULL,       -- 项目名称
+    description TEXT,                         -- 项目描述
+    creator_id INT NOT NULL,                  -- 创建者ID（外键，关联用户表）
+    status ENUM('PENDING', 'APPROVED', 'REJECTED') DEFAULT 'PENDING', -- 项目状态
+    submission_date DATE,                     -- 项目提交时间
+    review_date DATE,                         -- 项目评审时间
+    participants INT DEFAULT 0,               -- 项目参与人数
+    FOREIGN KEY (creator_id) REFERENCES users(id) -- 外键约束
+);
+CREATE TABLE reviewers (
+    id INT AUTO_INCREMENT PRIMARY KEY,        -- 评委ID
+    reviewer_code VARCHAR(20) NOT NULL UNIQUE, -- 评委编号
+    name VARCHAR(50) NOT NULL,                -- 评委姓名
+    email VARCHAR(100) NOT NULL UNIQUE,       -- 评委邮箱
+);
+CREATE TABLE reviews (
+    id INT AUTO_INCREMENT PRIMARY KEY,        -- 评审活动ID
+    project_id INT NOT NULL,                  -- 项目ID（外键，关联项目表）
+    reviewer_id INT NOT NULL,                 -- 评委ID（外键，关联评委表）
+    review_date DATE NOT NULL,                -- 评审日期
+    status ENUM('ONGOING', 'COMPLETED') DEFAULT 'ONGOING', -- 评审活动状态
+    feedback TEXT,                            -- 评审意见
+    score INT DEFAULT NULL,                   -- 项目评分
+    FOREIGN KEY (project_id) REFERENCES projects(id), -- 外键约束
+    FOREIGN KEY (reviewer_id) REFERENCES reviewers(id) -- 外键约束
+);
