@@ -1,0 +1,108 @@
+import java.sql.*;
+import java.util.Scanner;
+
+public class UserAuthCLI {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+
+        while (true) {
+            System.out.println("=== 用户认证系统 ===");
+            System.out.println("1. 登录");
+            System.out.println("2. 注册");
+            System.out.println("3. 退出");
+            System.out.print("请选择操作（1/2/3）：");
+
+            int choice = scanner.nextInt();
+            scanner.nextLine();  // 清除缓冲区
+
+            switch (choice) {
+                case 1:
+                    login(scanner);
+                    break;
+                case 2:
+                    register(scanner);
+                    break;
+                case 3:
+                    System.out.println("退出系统，欢迎下次使用！");
+                    return;
+                default:
+                    System.out.println("无效选择，请重新输入！");
+            }
+        }
+    }
+
+    // 登录方法
+    private static void login(Scanner scanner) {
+        System.out.print("请输入用户名：");
+        String username = scanner.nextLine();
+        System.out.print("请输入密码：");
+        String password = scanner.nextLine();
+
+        String sql = "SELECT * FROM users WHERE username = ? AND password = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, username);
+            pstmt.setString(2, password);
+
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                System.out.println("登录成功，欢迎回来！");
+            } else {
+                System.out.println("用户名或密码错误！");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    // 注册方法
+    private static void register(Scanner scanner) {
+        System.out.print("请输入用户名：");
+        String username = scanner.nextLine();
+        System.out.print("请输入密码：");
+        String password = scanner.nextLine();
+        System.out.print("请确认密码：");
+        String confirmPassword = scanner.nextLine();
+        System.out.print("请输入电子邮箱：");
+        String email = scanner.nextLine();
+        System.out.print("请选择身份 (admin/reviewer/user)：");
+        String role = scanner.nextLine();
+
+
+        if (!password.equals(confirmPassword)) {
+            System.out.println("两次输入的密码不一致！");
+            return;
+        }
+
+        String checkSQL = "SELECT * FROM users WHERE username = ?";
+        String insertSQL = "INSERT INTO users (username, password, email, role) VALUES (?, ?, ?, ?)";
+
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement checkStmt = conn.prepareStatement(checkSQL);
+             PreparedStatement insertStmt = conn.prepareStatement(insertSQL)) {
+
+            // 检查用户名是否已存在
+            checkStmt.setString(1, username);
+            ResultSet rs = checkStmt.executeQuery();
+            if (rs.next()) {
+                System.out.println("用户名已存在，请尝试登录或更换用户名！");
+                return;
+            }
+
+            // 插入新用户
+            insertStmt.setString(1, username);
+            insertStmt.setString(2, password);
+            insertStmt.setString(3, email);
+            insertStmt.setString(4, role);
+            insertStmt.executeUpdate();
+            System.out.println("注册成功，请登录！");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
+
+
+
